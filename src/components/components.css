@@ -1,0 +1,70 @@
+.header {
+    text-align: center;
+}
+
+p {
+    margin: 0px;
+}
+
+.board {
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* justify-content: space-evenly; */
+    background-color: black;
+    height: 100vh;
+    margin: 0px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    width: 80%;
+    margin: auto;
+}
+
+.letter-box {
+    width: 50px;
+    height: 50px;
+    border: 2px solid white;
+    background-color: grey;
+    margin: 5px;
+    font-size: 40px;
+    padding: 0px;
+    text-align: center;
+    color: white;
+}
+
+.keyboard {
+    /* display: grid; */
+    /* grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;  */
+    /* align-items: center; */
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    /* text-align: center; */
+}
+
+.keyboard-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; 
+    /* margin: auto; */
+    /* width: 100%; */
+    
+}
+.key {
+    color: white;
+    background-color: rgb(40,40,40);
+    border: 1px solid white;
+    font-size: 24px;
+    margin: 3px;
+    height: 30px;
+    /* padding: 4px; */
+    text-align: center;
+}
+
+.key > p {
+    width: 100%;
+}
+.key:active {
+    background-color: rgba(60,60,60);
+}
