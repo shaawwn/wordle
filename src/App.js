@@ -1,5 +1,6 @@
 import GameBoard from './components/board.js';
 import style from './style.css'
+
 function App() {
   return (
     <div className="App">

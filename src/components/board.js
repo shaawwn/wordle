@@ -6,8 +6,10 @@ import CheckMatch from '../logic/checkmatch.js'
 // TODOs
 
 // Need to check for whether a letter is IN the word, and change letter color depending ont hat
-const TEST_DICT = ['QWERT', 'ASDFG', 'TREWQ', 'QWWTT']
-const TEST_WORD = ['TREWQ']
+const TEST_DICT = ['QWERT', 'ASDFG', 'TREWQ', 'QWWTT', 'TQWER', 'TREWA']
+const TEST_WORD = ['TREWA']
+
+
 function GameBoard() {
     // Also, guessed word SHOULD BE A WORD, meaning I need access to some dictionary of words
     // Main gameboard for wordle clone
@@ -15,9 +17,17 @@ function GameBoard() {
     // Rows get state of guessed word (correct, incorrect letters)
     // Keyboard gets state of individually selected letters, ie if 'G' is in the owrd, then the 'G' key should be
         // highlited Green
+    const [letterState, setLetterState] = useState({ // default game state everything false, keyboard updates with guesses
+            "A": false,"B": false,"C": false,"D": false,"E": false,"F": false,"G": false,"H": false,
+            "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+            "Q": false,"R": false,"S": false,"T": false,"U": false,"V": false,"W": false,"X": false,
+            "Y": false,"Z": false})
     
-    const [guessedLetters, setGuessedLetters] = useState({'s': true, 'b': false, 'e': 'partial'}) // Empty by default, updates with each guessed word
+        
+    const [guessedLetters, setGuessedLetters] = useState([]) // Empty by default, updates with each guessed word, persistent through round
     const [currentGuess, setCurrentGuess] = useState([])
+    const [guessedLettersArray, setGuessedLettersArray] = useState([{},{},{},{},{},{}]) // persist guesses throughout game round
+
     // Default state for activeRow, activeLetterBox is default [0],[0,0], the top left most square, last row is [5, 4]
     const [activeLetterBox, setActiveLetterBox] = useState([0,0]) // The currently active letterbox needs to be known to keyboard key so
     const [activeRow, setActiveRow] = useState(0)
@@ -60,26 +70,85 @@ function GameBoard() {
     function handleDelEnt(keyValue) {
         // handle clicking delete and enter keys
         if(keyValue === 'DEL') {
-            console.log("Hitting delete", clickedKey)
+            // console.log("Hitting delete", clickedKey)
             // decrementLetterBox()
             setClickedKey('DEL')
-            console.log("Deleteding in keyClik", currentGuess)
+            // console.log("Deleteding in keyClik", currentGuess)
             deleteChar()
             // decrementLetterBox() // Box gets decremented here, while the actual char gets deleted in useEffect()
             return false
         }
         if(keyValue === 'ENT') {
+            // console.log("Current guess afte rhitting enter", currentGuess, TEST_WORD[0].split(''))
             setClickedKey('ENT')
             if(checkValidWord()) {
-                const matcher = new CheckMatch(currentGuess, TEST_WORD[0].split(','))
+                const matcher = new CheckMatch(TEST_WORD[0].split(''), currentGuess)
                 if(matcher.checkWordMatch()) {
+                    // matched word ending game condition
                     alert("You win!") // maybe try to do letter reveal
-                    // console.log("Words match!", currentGuess, TEST_WORD)
+                } else {
+                    // Check letters when game over condition is NOT met
+                    updateGuessedLetters(matcher) // updates CURRENT GUESS
+                    updateLetterState(matcher) // updates PERSISTENT KEYBOARD STATE through guess rows
                 }
             }
             return false
         }
     }
+    
+    function updateLetterState(matcherObject) { // for updating the game state keyboard to reflect letter guesses
+        // persistent game round state for letters, updates to reflect correctly guessed letters in order
+        // to change the color on the keyboard keys
+        console.log("Updating state of letters")
+        ///TODO
+        setLetterState(
+            matcherObject.updateKeyboardState(letterState)
+        )
+    }
+
+    function updateGuessedLetters(matcherObject) { // for updating the status of letters in a single guess
+        // as letters are guessed, if their status changes, eg partial => true, update the guessLetters state
+        // guessedLetters is an object that MAY contain all letters in the alphabet, but no duplicates, therefore
+        // when an existing letter status changes, that letter ONLY needs to change status
+        // this should prevent overwriting guessedLetters every time a guess is made
+        console.log("Guessed letters in updateletters", guessedLetters)
+        let guessedLettersRaw = {}
+        let guessedLettersArrayRaw = guessedLettersArray
+        const guess = matcherObject.checkLetters() // this is a raw object for this guess ONLY, need to merge/update with guessedLetters
+        Object.keys(guess).forEach(letter => {
+
+            // if(Object.keys(guessedLetters).includes(letter)) {
+            //     // guessedLetters[letter] = guess[letter] // this should set guessedLetter and guess to same value
+            //     // console.log("letter has already been guessed", letter)
+            //     guessedLetters[letter] = guess[letter]
+            // } else {
+            //     console.log("Letter is new entry", letter)
+            //     guessedLetters[letter] = guess[letter]
+            // }
+
+            // CHANGED FROM ABOVE!! guessedLetters => guessedLettersRaw, change back if needed
+            if(Object.keys(guessedLettersRaw).includes(letter)) {
+                guessedLettersRaw[letter] = guess[letter]
+            } else {
+                guessedLettersRaw[letter] = guess[letter]
+            }
+        })
+        console.log("Guessed letters after function runs", guessedLetters)
+        // setGuessedLetters(guessedLetters)
+        setGuessedLetters(guessedLettersRaw)
+        // setGuessedLettersArray(guessedLettersArray.concat(guessedLetters))
+        guessedLettersArrayRaw[activeRow] = guessedLettersRaw
+        setGuessedLettersArray(guessedLettersArrayRaw)
+    }
+
+    function T_updateGuessLetters(matcherObject) {
+        // guessedLetters ix an existing object(imported from letters.json), that is used to check agaisnt guess
+        // by default, guessedLetters begins with all letters set to false, but as letters are guessed, update that
+        // state depending on success of guess, ie if letter is in word in correct order, guess letter = true
+        
+
+    }
+    
     function getActiveLetterBox() {
         // returns the current active DOM letterBox, can update
         // boxs are id'd by row and column number, id="row-x col-y"
@@ -152,12 +221,11 @@ function GameBoard() {
         }
     }
 
-    function matchWord() {
-        // check VALID WORD against the actual word
-    }
     useEffect(() => {
         // console.log("Current guess", currentGuess) // nm check it here
         // Should not be able to advance to next row until ENT is hit
+        // console.log("guessed letters", guessedLetters, guessedLettersArray)
+        // console.log("Letter state", letterState)
         if(clickedKey === 'DEL') {
             // console.log("Deleted in useEffect")
             // deleteChar() // there is somethign with decrementing the box that is wonky and this needs to get called twice to work
@@ -167,13 +235,13 @@ function GameBoard() {
     return(
         <div className="board">
             <h1>Gameboard</h1>
-            <Row id="0"/>
-            <Row id="1"/>
-            <Row id="2"/>
-            <Row id="3"/>
-            <Row id="4"/>
-            <Row id="5"/>
-            <Keyboard letterStatus={guessedLetters} keyClick={onKeyClick} active={[activeRow, activeLetterBox]}/>
+            <Row id="0" guessArray={guessedLettersArray[0]}/>
+            <Row id="1" guessArray={guessedLettersArray[1]}/>
+            <Row id="2" guessArray={guessedLettersArray[2]}/>
+            <Row id="3" guessArray={guessedLettersArray[3]}/>
+            <Row id="4" guessArray={guessedLettersArray[4]}/>
+            <Row id="5" guessArray={guessedLettersArray[5]}/>
+            <Keyboard letterStatus={letterState} keyClick={onKeyClick} active={[activeRow, activeLetterBox]}/>
         </div>
     )
 }

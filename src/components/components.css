@@ -34,6 +34,14 @@ p {
     color: white;
 }
 
+.letter-box-true {
+    background-color: green;
+}
+
+.letter-box-partial {
+    background-color: orange;
+}
+
 .keyboard {
     /* display: grid; */
     /* grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;  */
@@ -60,6 +68,14 @@ p {
     height: 30px;
     /* padding: 4px; */
     text-align: center;
+}
+
+.key-true {
+    background-color: green;
+}
+
+.key-partial {
+    background-color: orange;
 }
 
 .key > p {

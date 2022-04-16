@@ -83,7 +83,7 @@ test("no common letters should return object with all false", () => {
     const matcher = new checkMatch(['w','o','r','d','s'], ['z','i','l','l','a']);
     expect(matcher.checkLetters()).toEqual(
         {
-            'z': false,
+            'z': false, // 'z': {0:false,1:false,2: false,3: false,4: false}
             'i': false,
             'l': false,
             'l': false, // oh boy, but maybe its ok for this project
@@ -92,3 +92,85 @@ test("no common letters should return object with all false", () => {
     )
 }) 
 
+// guessedLetters should be a list of object of keys, with values that are a dictionary
+test("'E' in 'STEVE' should return true, partial as a guess for the word 'STEER'", () => {
+    const matcher = new checkMatch(['S','T','E','E','R'], ['S','T','E','V','E']);
+    //TODO
+    // game function using guessedLetter object that uses match info to update guessedLetter key/values
+    // guessedLetters = {'E': {2: true, 4: 'partial}} is what e should be
+    // expect(updateGuessedLetters()).toBe(false;)
+})
+
+// with each guess, the OVERALL state of guessed letters should persist following each guess, ie, if 'A' is correctly guessed,
+// then the KEYBOARD should reflect that status, and should persist for as long as the game continues
+test("For the word STEER, guessing STOVE should reflect S/T as True, and E as partial in the keyboard state object", () => {
+    const matcher = new checkMatch(['S','T','E','E','R'], ['S','T','O','V','E']);
+    let keyBoard = {
+        "A": false,"B": false,"C": false,"D": false,"E": false,"F": false,"G": false,"H": false,
+        "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+        "Q": false,"R": false,"S": false,"T": false,"U": false,"V": false,"W": false,"X": false,
+        "Y": false,"Z": false}
+
+    matcher.checkKeyboardState(keyBoard);
+    expect(keyBoard).toEqual(
+        {
+            "A": false,"B": false,"C": false,"D": false,"E": 'partial',"F": false,"G": false,"H": false,
+            "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+            "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+            "Y": false,"Z": false}
+    )
+})
+
+test("For the word STEER, and guessing STOVE, following guess STEED should reflect E in correect location and change nothing", () => {
+    const matcher = new checkMatch(['S','T','E','E','R'], ['S','T','E','E','D']);
+    let keyBoard = {
+        "A": false,"B": false,"C": false,"D": false,"E": 'partial',"F": false,"G": false,"H": false,
+        "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+        "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+        "Y": false,"Z": false}
+        
+    matcher.checkKeyboardState(keyBoard);
+    expect(keyBoard).toEqual(
+        {
+            "A": false,"B": false,"C": false,"D": false,"E": true,"F": false,"G": false,"H": false,
+            "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+            "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+            "Y": false,"Z": false}
+    )
+})
+
+test("For the word STEER, and guessing STEAM should not change E from true to false or partial", () => {
+    const matcher = new checkMatch(['S','T','E','E','R'], ['S','T','E','A','M']);
+    let keyBoard = {
+        "A": false,"B": false,"C": false,"D": false,"E": true,"F": false,"G": false,"H": false,
+        "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+        "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+        "Y": false,"Z": false}
+        
+    matcher.checkKeyboardState(keyBoard);
+    expect(keyBoard).toEqual(
+        {
+            "A": false,"B": false,"C": false,"D": false,"E": true,"F": false,"G": false,"H": false,
+            "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+            "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+            "Y": false,"Z": false}
+    )
+})
+
+test("For the word STEER, completely wrong guess should not change keyboard state", () => {
+    const matcher = new checkMatch(['S','T','E','E','R'], ['P','O','L','Y','P']);
+    let keyBoard = {
+        "A": false,"B": false,"C": false,"D": false,"E": true,"F": false,"G": false,"H": false,
+        "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+        "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+        "Y": false,"Z": false}
+        
+    matcher.checkKeyboardState(keyBoard);
+    expect(keyBoard).toEqual(
+        {
+            "A": false,"B": false,"C": false,"D": false,"E": true,"F": false,"G": false,"H": false,
+            "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
+            "Q": false,"R": false,"S": true,"T": true,"U": false,"V": false,"W": false,"X": false,
+            "Y": false,"Z": false}
+    )
+})

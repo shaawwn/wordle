@@ -75,7 +75,7 @@ function KeyboardRow(props) {
             {
                 parseRow(props.rowLevel).map((element) => {
                     // console.log(element)
-                    return <Key key={uniqid()}letter={element} keyClick={props.keyClick} active={[props.active]} />
+                    return <Key key={uniqid()}letter={element} keyClick={props.keyClick} letterStatus={props.letterStatus} active={[props.active]} />
                 })
             }
         </div>
