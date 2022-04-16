@@ -7,7 +7,7 @@ function Key(props) {
     // Needs some awareness of which letterbox is currently active, so that anything pressed will update THAT box and no
     // other boxes
     const [status, setStatus] = useState(false) // starts false by default
-    console.log("Props in key", props)
+    // console.log("Props in key", props)
     const letterStatus = props.letterStatus
     const active = props.active[0][0] // easier to see what active row, box is
 

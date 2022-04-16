@@ -10,13 +10,14 @@ const TEST_DICT = ['QWERT', 'ASDFG', 'TREWQ', 'QWWTT', 'TQWER', 'TREWA']
 const TEST_WORD = ['TREWA']
 
 
-function GameBoard() {
+function GameBoard(props) {
     // Also, guessed word SHOULD BE A WORD, meaning I need access to some dictionary of words
     // Main gameboard for wordle clone
     // Whats the state passed to each component?
     // Rows get state of guessed word (correct, incorrect letters)
     // Keyboard gets state of individually selected letters, ie if 'G' is in the owrd, then the 'G' key should be
         // highlited Green
+    console.log("Word: ", props.word)
     const [letterState, setLetterState] = useState({ // default game state everything false, keyboard updates with guesses
             "A": false,"B": false,"C": false,"D": false,"E": false,"F": false,"G": false,"H": false,
             "I": false,"J": false,"K": false,"L": false,"M": false,"N": false,"O": false,"P": false,
@@ -37,7 +38,7 @@ function GameBoard() {
     function onKeyClick(keyValue) {
         // pass this function to the keyboard keys to set the clickedKey
         // activeLetterBox should update as keys are clicked, and the letterbox hsould be updated with key value
-        // console.log("Current guess", currentGuess)
+        
         if(currentGuess.length === 5) {
             console.log("Cannot enter anymore letters without submitting or deleting")
             handleDelEnt(keyValue)
@@ -49,6 +50,7 @@ function GameBoard() {
         }
         
         if(handleDelEnt(keyValue) === false) {
+            // stop function if ent or del is hit, this prevents row/letter form incrementing when non-letter ent/del are clicked
             return false
         }
 
@@ -72,8 +74,11 @@ function GameBoard() {
         if(keyValue === 'DEL') {
             // console.log("Hitting delete", clickedKey)
             // decrementLetterBox()
+            // setClickedKey('DEL')
+   
+            decrementLetterBox()
+
             setClickedKey('DEL')
-            // console.log("Deleteding in keyClik", currentGuess)
             deleteChar()
             // decrementLetterBox() // Box gets decremented here, while the actual char gets deleted in useEffect()
             return false
@@ -82,7 +87,8 @@ function GameBoard() {
             // console.log("Current guess afte rhitting enter", currentGuess, TEST_WORD[0].split(''))
             setClickedKey('ENT')
             if(checkValidWord()) {
-                const matcher = new CheckMatch(TEST_WORD[0].split(''), currentGuess)
+                // const matcher = new CheckMatch(TEST_WORD[0].split(''), currentGuess)
+                const matcher = new CheckMatch(props.word.toUpperCase().split(''), currentGuess)
                 if(matcher.checkWordMatch()) {
                     // matched word ending game condition
                     alert("You win!") // maybe try to do letter reveal
@@ -140,14 +146,6 @@ function GameBoard() {
         guessedLettersArrayRaw[activeRow] = guessedLettersRaw
         setGuessedLettersArray(guessedLettersArrayRaw)
     }
-
-    function T_updateGuessLetters(matcherObject) {
-        // guessedLetters ix an existing object(imported from letters.json), that is used to check agaisnt guess
-        // by default, guessedLetters begins with all letters set to false, but as letters are guessed, update that
-        // state depending on success of guess, ie if letter is in word in correct order, guess letter = true
-        
-
-    }
     
     function getActiveLetterBox() {
         // returns the current active DOM letterBox, can update
@@ -156,6 +154,16 @@ function GameBoard() {
         const currentBox =  document.getElementById(`${currentBoxID}`)
         // console.log("getActiveletterbox", activeLetterBox, currentBox)
         return currentBox
+    }
+
+    function getCurrentLetterBox() {
+        // Differs from activeLetterBox in by getting the most currently occupied letter box, used
+        // for the purpose fo deleting letters when delete key is selected
+
+        const currentBoxID = `row-${activeLetterBox[0]} col-${activeLetterBox[1]}`
+        const currentBox =  document.getElementById(`${currentBoxID}`)
+        // console.log("getActiveletterbox", activeLetterBox, currentBox)
+        return currentBox   
     }
 
     function incrementLetterBox() {
@@ -175,6 +183,8 @@ function GameBoard() {
             console.log("Cannot delete", currentGuess, activeRow, activeLetterBox)
             return false
         }
+        const current = getActiveLetterBox();
+        console.log("Current before decrement", current, [activeRow, activeLetterBox[1] - 1])
         setActiveLetterBox([activeRow, activeLetterBox[1] - 1])
         console.log("Decremengint", activeLetterBox)
     }
@@ -193,15 +203,16 @@ function GameBoard() {
     function deleteChar() {
         // delete last entered character when user hits DEL button
         // Must also decrement letterbox as well, cannot go back a row though
-        console.log("Calling deleteChar")
+        // console.log("Calling deleteChar")
 
-        decrementLetterBox()
-        // console.log("After dec. function", activeLetterBox)
+        // decrementLetterBox()
         const currentBox = getActiveLetterBox(); // Active letterbox will be empty box, so....currently removes one letter behind
-        console.log("Checking current box", currentBox, activeLetterBox)
-        currentBox.innerText = '';
+        // currentBox.innerText = '';
+        console.log("Currentbox", currentBox)
         currentGuess.pop() // Removes the last letter from the guessedWord array
         setCurrentGuess(currentGuess)
+        currentBox.innerText = '';
+        // decrementLetterBox()
     }
 
     function joinLetters() {
@@ -210,7 +221,7 @@ function GameBoard() {
 
     function checkValidWord() {
         // check that guess gainst dict to ensure only valid words can be submitted)
-        if(TEST_DICT.includes(currentGuess.join(""))) {
+        if(props.dict.includes(currentGuess.join("").toLowerCase())) {
             console.log("Valid")
             setCurrentGuess([])
             incrementRow()
@@ -222,14 +233,10 @@ function GameBoard() {
     }
 
     useEffect(() => {
-        // console.log("Current guess", currentGuess) // nm check it here
-        // Should not be able to advance to next row until ENT is hit
-        // console.log("guessed letters", guessedLetters, guessedLettersArray)
-        // console.log("Letter state", letterState)
-        if(clickedKey === 'DEL') {
-            // console.log("Deleted in useEffect")
-            // deleteChar() // there is somethign with decrementing the box that is wonky and this needs to get called twice to work
-        }
+        // const current = getActiveLetterBox()
+        handleDelEnt(clickedKey)
+        // const current = getActiveLetterBox()
+        // console.log("Current", current)
     },[clickedKey]) // repeat letters won't trigger this
 
     return(

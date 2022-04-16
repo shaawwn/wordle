@@ -13,7 +13,7 @@ class checkMatch {
         this.word = word;
         this.guess = guess;
     }
-
+  
     checkWordMatch() {
         // checks if the guessed word matches the word
         if(this.word.join("") === this.guess.join("")) {
